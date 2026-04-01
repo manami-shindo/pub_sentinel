@@ -14,8 +14,7 @@ void main() {
       // proivder: 'iv' and 'vi' are swapped (transposition of provider)
       project.writeLockFile(_lockFileWith('proivder'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, hasLength(1));
       expect(results.first.package, 'proivder');
@@ -27,8 +26,7 @@ void main() {
       // provder: missing 'i' from provider
       project.writeLockFile(_lockFileWith('provder'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, hasLength(1));
       expect(results.first.package, 'provder');
@@ -39,8 +37,7 @@ void main() {
       // rriverpod: extra 'r' at the start
       project.writeLockFile(_lockFileWith('rriverpod'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, hasLength(1));
       expect(results.first.package, 'rriverpod');
@@ -51,8 +48,7 @@ void main() {
       // flutter_bl0c: 'o' replaced with '0'
       project.writeLockFile(_lockFileWith('flutter_bl0c'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, hasLength(1));
       expect(results.first.package, 'flutter_bl0c');
@@ -62,8 +58,7 @@ void main() {
     test('does not flag the popular package itself', () async {
       project.writeLockFile(_lockFileWith('provider'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, isEmpty);
     });
@@ -71,8 +66,7 @@ void main() {
     test('does not flag unrelated packages', () async {
       project.writeLockFile(_lockFileWith('my_custom_widget'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, isEmpty);
     });
@@ -81,23 +75,20 @@ void main() {
       // 'htpp' (4 chars) is 1 edit from 'http' but too short to check
       project.writeLockFile(_lockFileWith('htpp'));
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, isEmpty);
     });
 
     test('returns empty list when pubspec.lock is missing', () async {
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
       expect(results, isEmpty);
     });
 
     test('treats malformed pubspec.lock as warning', () async {
       project.writeLockFile('packages: [');
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, hasLength(1));
       expect(results.first.package, '(project)');
@@ -115,8 +106,7 @@ packages:
 sdkConstraints: {}
 ''');
 
-      final results =
-          await TyposquatChecker(projectPath: project.path).run();
+      final results = await TyposquatChecker(projectPath: project.path).run();
 
       expect(results, isEmpty);
     });
