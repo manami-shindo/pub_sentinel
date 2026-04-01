@@ -5,7 +5,7 @@ import '../models/check_result.dart';
 import '../pub_api/pub_api_client.dart';
 import 'checker.dart';
 
-/// バージョンアップ時に突然追加された依存関係を検出する（サプライチェーン攻撃の主要パターン）
+/// Detects dependencies suddenly added in a version upgrade (a key supply-chain attack pattern).
 class DepDiffChecker implements Checker {
   final String projectPath;
   final PubApiClient apiClient;
@@ -15,8 +15,8 @@ class DepDiffChecker implements Checker {
     required this.apiClient,
   });
 
-  /// dart-lang / flutter が管理する定番パッケージ群。
-  /// これらが追加されても攻撃の兆候とは見なさない。
+  /// Well-known packages maintained by dart-lang / Flutter.
+  /// Adding these is not considered suspicious.
   static const _knownSafePackages = {
     // dart-lang core
     'async', 'collection', 'convert', 'crypto', 'ffi', 'fixnum',
@@ -64,16 +64,16 @@ class DepDiffChecker implements Checker {
         );
         if (addedDeps.isEmpty) continue;
 
-        // フィルタリング：明らかに正当な追加を除外
+        // Filter out clearly legitimate additions
         final mainPublisher = await apiClient.fetchPublisher(name);
 
-        // まず静的ルール（リスト・命名パターン）で除外
+        // First, exclude by static rules (list + naming patterns)
         final candidates = addedDeps
             .where((dep) => !_isStaticallySafe(dep, name))
             .toList();
         if (candidates.isEmpty) continue;
 
-        // 残ったものはパブリッシャーを比較して除外
+        // Then compare publishers for the remaining candidates
         final suspicious = <String>[];
         for (final dep in candidates) {
           if (mainPublisher != null) {
@@ -91,17 +91,17 @@ class DepDiffChecker implements Checker {
         results.add(CheckResult(
           package: name,
           severity: severity,
-          message: 'v$version で不審な依存パッケージが追加されました: ${suspicious.join(', ')}',
-          detail: '前バージョン (v${previous.version}) にはなかった依存が追加されています。'
-              'サプライチェーン攻撃の典型的なパターンです。変更内容を確認してください。',
+          message: 'Suspicious dependencies added in v$version: ${suspicious.join(', ')}',
+          detail: 'Dependencies not present in the previous version (v${previous.version}) were added. '
+              'This is a typical supply-chain attack pattern. Please review the changes.',
         ));
       } on PackageNotFoundException {
-        // git 依存など pub.dev にないパッケージはスキップ
+        // Packages not on pub.dev (e.g. git deps) are skipped
       } on PubApiException catch (e) {
         results.add(CheckResult(
           package: name,
           severity: Severity.warning,
-          message: '依存差分チェック中に pub.dev への問い合わせが失敗しました',
+          message: 'Failed to query pub.dev during dependency diff check',
           detail: e.message,
         ));
       }
@@ -116,35 +116,35 @@ class DepDiffChecker implements Checker {
       results.add(CheckResult(
         package: '(project)',
         severity: Severity.warning,
-        message: 'pubspec.lock を解析できませんでした',
-        detail: '不正な YAML のため一部の検査をスキップしました: ${e.message}',
+        message: 'Failed to parse pubspec.lock',
+        detail: 'Invalid YAML; some checks were skipped: ${e.message}',
       ));
     } on FileSystemException catch (e) {
       results.add(CheckResult(
         package: '(project)',
         severity: Severity.warning,
-        message: 'pubspec.lock を読み取れませんでした',
+        message: 'Failed to read pubspec.lock',
         detail: e.message,
       ));
     }
     return {};
   }
 
-  /// 静的ルールで安全と判定できるかどうかを返す（API 呼び出し不要）
+  /// Returns true if the dep is statically safe (no API call needed).
   bool _isStaticallySafe(String dep, String mainPackage) {
-    // 1. 既知の安全パッケージリスト
+    // 1. Known-safe package list
     if (_knownSafePackages.contains(dep)) return true;
 
-    // 2. サブパッケージ命名パターン（url_launcher_web, shared_preferences_macos など）
+    // 2. Sub-package naming pattern (url_launcher_web, shared_preferences_macos, etc.)
     if (dep.startsWith('${mainPackage}_')) return true;
 
     return false;
   }
 
-  /// severity はバージョンアップの種類で決定する
-  /// パッチ → CRITICAL（最も怪しい）
-  /// マイナー → WARNING
-  /// メジャー → INFO（大改修なので依存追加はあり得る）
+  /// Severity is determined by the type of version bump:
+  /// patch → CRITICAL (most suspicious)
+  /// minor → WARNING
+  /// major → INFO (large refactor; new deps are plausible)
   Severity _severityFor(String fromVersion, String toVersion) {
     try {
       final from = Version.parse(fromVersion);
@@ -152,9 +152,9 @@ class DepDiffChecker implements Checker {
 
       if (to.major > from.major) return Severity.info;
       if (to.minor > from.minor) return Severity.warning;
-      return Severity.critical; // パッチ or ビルドメタデータのみの変化
+      return Severity.critical; // patch or build-metadata-only change
     } catch (_) {
-      return Severity.warning; // パースできない場合は warning にフォールバック
+      return Severity.warning; // fall back to warning if versions cannot be parsed
     }
   }
 

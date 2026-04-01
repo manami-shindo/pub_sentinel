@@ -4,7 +4,7 @@ import '../models/check_result.dart';
 import '../pub_api/pub_api_client.dart';
 import 'checker.dart';
 
-/// 直近 N 日以内に公開されたバージョンを使っていたら警告する
+/// Warns when the locked version was published within the last N days.
 class NewVersionChecker implements Checker {
   final String projectPath;
   final PubApiClient apiClient;
@@ -40,18 +40,18 @@ class NewVersionChecker implements Checker {
           results.add(CheckResult(
             package: name,
             severity: Severity.warning,
-            message: 'v$version は公開から ${age.inHours} 時間しか経っていません',
-            detail: '公開直後のパッケージはセキュリティ審査が十分でない可能性があります。'
-                '(公開日時: ${versionInfo.published.toIso8601String()})',
+            message: 'v$version was published only ${age.inHours} hour(s) ago',
+            detail: 'Recently published packages may not have been reviewed for security. '
+                '(published: ${versionInfo.published.toIso8601String()})',
           ));
         }
       } on PackageNotFoundException {
-        // pubspec.lock に載っているが pub.dev に存在しない（git依存など）はスキップ
+        // Packages in pubspec.lock but not on pub.dev (e.g. git deps) are skipped
       } on PubApiException catch (e) {
         results.add(CheckResult(
           package: name,
           severity: Severity.warning,
-          message: 'pub.dev からパッケージ情報を取得できませんでした',
+          message: 'Failed to fetch package info from pub.dev',
           detail: e.message,
         ));
       }
@@ -66,14 +66,14 @@ class NewVersionChecker implements Checker {
       results.add(CheckResult(
         package: '(project)',
         severity: Severity.warning,
-        message: 'pubspec.lock を解析できませんでした',
-        detail: '不正な YAML のため一部の検査をスキップしました: ${e.message}',
+        message: 'Failed to parse pubspec.lock',
+        detail: 'Invalid YAML; some checks were skipped: ${e.message}',
       ));
     } on FileSystemException catch (e) {
       results.add(CheckResult(
         package: '(project)',
         severity: Severity.warning,
-        message: 'pubspec.lock を読み取れませんでした',
+        message: 'Failed to read pubspec.lock',
         detail: e.message,
       ));
     }
@@ -90,7 +90,7 @@ class NewVersionChecker implements Checker {
     for (final entry in packages.entries) {
       final name = entry.key as String;
       final meta = entry.value as YamlMap;
-      // hosted パッケージのみ対象
+      // Only hosted packages
       if (meta['source'] == 'hosted') {
         final version = meta['version'] as String?;
         if (version != null) result[name] = version;

@@ -35,7 +35,7 @@ void main() {
   tearDown(() => project.tearDown());
 
   group('PublisherChecker', () {
-    test('検証済みパブリッシャーがない場合 info を返す', () async {
+    test('returns info when no verified publisher is set', () async {
       project.writeLockFile(_singlePackageLockFile);
 
       final fakeClient = FakeHttpClient({
@@ -50,10 +50,10 @@ void main() {
       expect(results, hasLength(1));
       expect(results.first.package, 'foo');
       expect(results.first.severity, Severity.info);
-      expect(results.first.message, contains('検証済みパブリッシャー'));
+      expect(results.first.message, contains('verified publisher'));
     });
 
-    test('使い捨てメールドメインのパブリッシャーは critical を返す', () async {
+    test('returns critical for disposable email domain publisher', () async {
       project.writeLockFile(_singlePackageLockFile);
 
       final fakeClient = FakeHttpClient({
@@ -72,7 +72,7 @@ void main() {
       expect(results.first.message, contains('mailinator.com'));
     });
 
-    test('サブドメインの使い捨てメールドメインも critical を返す', () async {
+    test('returns critical for subdomain of disposable email domain', () async {
       project.writeLockFile(_singlePackageLockFile);
 
       final fakeClient = FakeHttpClient({
@@ -90,7 +90,7 @@ void main() {
       expect(results.first.message, contains('attacker.mailinator.com'));
     });
 
-    test('正常なパブリッシャーがある場合は結果を返さない', () async {
+    test('returns no results for legitimate publisher', () async {
       project.writeLockFile(_singlePackageLockFile);
 
       final fakeClient = FakeHttpClient({
@@ -106,7 +106,7 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('複数パッケージを個別に評価する', () async {
+    test('evaluates multiple packages independently', () async {
       project.writeLockFile(_lockFile);
 
       final fakeClient = FakeHttpClient({
@@ -125,7 +125,7 @@ void main() {
       expect(results.first.severity, Severity.info);
     });
 
-    test('pubspec.lock がない場合 空リストを返す', () async {
+    test('returns empty list when pubspec.lock is missing', () async {
       final results = await PublisherChecker(
         projectPath: project.path,
         apiClient: PubApiClient(),
@@ -134,10 +134,10 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('ネットワークエラーは warning を返す', () async {
+    test('returns warning on network error', () async {
       project.writeLockFile(_singlePackageLockFile);
 
-      // send() 自体が例外を投げるクライアントで PubApiException を発生させる
+      // Client that throws http.ClientException to trigger PubApiException
       final fakeErrorClient = _ThrowingHttpClient();
 
       final results = await PublisherChecker(
@@ -150,7 +150,7 @@ void main() {
       expect(results.first.severity, Severity.warning);
     });
 
-    test('壊れた pubspec.lock は warning として扱う', () async {
+    test('treats malformed pubspec.lock as warning', () async {
       project.writeLockFile('packages: [');
 
       final results = await PublisherChecker(
@@ -164,7 +164,7 @@ void main() {
       expect(results.first.message, contains('pubspec.lock'));
     });
 
-    test('git 依存など hosted 以外のパッケージはスキップする', () async {
+    test('skips non-hosted packages such as git dependencies', () async {
       project.writeLockFile('''
 packages:
   git_pkg:

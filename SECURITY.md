@@ -1,34 +1,34 @@
-# セキュリティポリシー
+# Security Policy
 
-## サポートバージョン
+## Supported Versions
 
-現在セキュリティアップデートの対象となっているバージョンは以下のとおりです。
+The following versions currently receive security updates.
 
-| バージョン | サポート状況 |
+| Version | Supported |
 |---|---|
-| 0.1.x | サポート中 |
+| 0.1.x | ✓ |
 
-## 脆弱性の報告
+## Reporting a Vulnerability
 
-セキュリティ上の問題を発見した場合は、**GitHub の公開 Issue には投稿しないでください。**
+If you discover a security issue, **please do not open a public GitHub Issue.**
 
-代わりに、以下のいずれかの方法でご連絡ください：
+Instead, use one of the following:
 
-- **GitHub Security Advisories**：[https://github.com/manami-shindo/pub_sentinel/security/advisories/new](https://github.com/manami-shindo/pub_sentinel/security/advisories/new)
+- **GitHub Security Advisories**: [https://github.com/manami-shindo/pub_sentinel/security/advisories/new](https://github.com/manami-shindo/pub_sentinel/security/advisories/new)
 
-報告の際は、できる限り以下の情報をご提供ください：
+Please include as much of the following information as possible:
 
-- 問題の種類（例：コマンドインジェクション、情報漏洩など）
-- 問題が発生するファイルパスとソースコードの場所
-- 再現に必要な設定・環境
-- 再現手順
-- 概念実証コード（可能であれば）
-- 問題の影響範囲
+- Type of issue (e.g. command injection, information disclosure)
+- File path(s) and source location of the issue
+- Configuration or environment required to reproduce
+- Step-by-step reproduction instructions
+- Proof-of-concept code (if available)
+- Impact of the issue
 
-いただいた情報をもとに、問題をより迅速に把握・修正することができます。
+This information helps us understand and resolve the problem more quickly.
 
-## 対応方針
+## Response Policy
 
-- 報告を受けてから **7 日以内** に受領の確認をお送りします
-- 内容を確認後、修正のめどが立ち次第お知らせします
-- 修正リリース後、報告者の方の名前（希望される場合）を CHANGELOG に記載します
+- We will acknowledge receipt within **7 days** of your report.
+- Once the issue is confirmed, we will notify you when a fix is underway.
+- After a fix is released, we will credit the reporter (if desired) in the CHANGELOG.

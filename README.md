@@ -1,65 +1,66 @@
 # pub_sentinel
 
-**pub_sentinel** は Dart/Flutter プロジェクトのサプライチェーン攻撃やリスクのある依存パッケージの変更を検出するセキュリティスキャナです。
+**pub_sentinel** is a security scanner for Dart/Flutter projects that detects supply-chain attack risks and suspicious changes in dependencies.
 
 [![pub package](https://img.shields.io/pub/v/pub_sentinel.svg)](https://pub.dev/packages/pub_sentinel)
 
-## 機能
+## Features
 
-- **ロックファイルチェック** — `pubspec.lock` が存在しない場合に警告します。ロックファイルがないと、環境によって異なるバージョンがインストールされる可能性があります。
-- **バージョン制約チェック** — `any`・空文字・`>=0.0.0` などの無制限な制約を検出します。任意のバージョンが解決される恐れがあります。
-- **新規バージョンチェック** — 公開から 3 日以内のパッケージを警告します。公開直後はセキュリティ審査が十分でない可能性があります。
-- **依存差分チェック** — ロックされた各パッケージの依存リストを前バージョンと比較し、突然追加された依存を検出します。これはサプライチェーン攻撃の典型的なパターンです。
+- **Lock file check** — warns when `pubspec.lock` is missing. Without it, different versions may be installed across environments.
+- **Version constraint check** — detects unconstrained dependencies such as `any`, empty string, or `>=0.0.0`. These allow any version to be resolved.
+- **New version check** — warns when the locked package version was published within the last 3 days. Freshly published packages may not have been reviewed for security.
+- **Dependency diff check** — compares each locked package's dependency list against the previous version and flags newly added dependencies. This is a typical supply-chain attack pattern.
+- **Publisher check** — reports packages with no verified publisher and flags those whose publisher domain matches a known disposable email service.
 
-## インストール
+## Installation
 
 ```sh
 dart pub global activate pub_sentinel
 ```
 
-または dev_dependencies に追加：
+Or add as a dev dependency:
 
 ```yaml
 dev_dependencies:
   pub_sentinel: ^0.1.0
 ```
 
-## 使い方
+## Usage
 
-Dart/Flutter プロジェクトのルートディレクトリでスキャンを実行します：
+Run the scanner from your Dart/Flutter project root:
 
 ```sh
 pub-sentinel
 ```
 
-特定のディレクトリを指定する場合：
+To specify a directory:
 
 ```sh
 pub-sentinel --path /path/to/your/project
 ```
 
-### オプション
+### Options
 
-| フラグ / オプション | 短縮形 | デフォルト | 説明 |
+| Flag / Option | Short | Default | Description |
 |---|---|---|---|
-| `--path` | `-p` | `.` | スキャン対象のプロジェクトディレクトリ |
-| `--format` | `-f` | `console` | 出力フォーマット：`console` または `json` |
-| `--no-color` | | | カラー出力を無効化 |
-| `--verbose` | `-v` | | スキャン中の進捗メッセージを表示 |
-| `--help` | `-h` | | ヘルプを表示 |
+| `--path` | `-p` | `.` | Project directory to scan |
+| `--format` | `-f` | `console` | Output format: `console` or `json` |
+| `--no-color` | | | Disable colored output |
+| `--verbose` | `-v` | | Show progress messages during scan |
+| `--help` | `-h` | | Show help |
 
-### コンソール出力の例
+### Console output example
 
 ```
-✗ CRITICAL  [some_package] v1.2.3 で不審な依存パッケージが追加されました: shady_lib
-             前バージョン (v1.2.2) にはなかった依存が追加されています。…
-⚠ WARNING   [another_pkg] v0.9.1 は公開から 4 時間しか経っていません
-ℹ INFO      [big_package] v2.0.0 で依存パッケージが追加されました: compat_shim
+✗ CRITICAL  [some_package] Suspicious dependencies added in v1.2.3: shady_lib
+             Dependencies not present in the previous version (v1.2.2) were added.…
+⚠ WARNING   [another_pkg] v0.9.1 was published only 4 hour(s) ago
+ℹ INFO      [big_package] No verified publisher
 
-3 件の問題が見つかりました (critical: 1, warning: 1, info: 1)
+3 issue(s) found (critical: 1, warning: 1, info: 1)
 ```
 
-### JSON 出力の例
+### JSON output example
 
 ```sh
 pub-sentinel --format json
@@ -70,39 +71,39 @@ pub-sentinel --format json
   {
     "package": "some_package",
     "severity": "critical",
-    "message": "v1.2.3 で不審な依存パッケージが追加されました: shady_lib",
-    "detail": "前バージョン (v1.2.2) にはなかった依存が追加されています。..."
+    "message": "Suspicious dependencies added in v1.2.3: shady_lib",
+    "detail": "Dependencies not present in the previous version (v1.2.2) were added. ..."
   }
 ]
 ```
 
-### 終了コード
+### Exit codes
 
-| コード | 意味 |
+| Code | Meaning |
 |---|---|
-| `0` | 問題なし |
-| `1` | `warning` または `critical` の問題が 1 件以上ある |
-| `2` | 引数が不正、またはプロジェクトパスが見つからない |
+| `0` | No issues found |
+| `1` | One or more `warning` or `critical` issues found |
+| `2` | Invalid arguments or project path not found |
 
-## CI との連携
+## CI integration
 
 ```yaml
-# GitHub Actions の例
-- name: pub-sentinel を実行
+# GitHub Actions example
+- name: Run pub-sentinel
   run: |
     dart pub global activate pub_sentinel
     pub-sentinel --format json > sentinel-report.json
 ```
 
-## 動作要件
+## Requirements
 
 - Dart SDK `>=3.0.0`
-- [pub.dev](https://pub.dev) API へのインターネットアクセス（新規バージョンチェック・依存差分チェックで使用）
+- Internet access to the [pub.dev](https://pub.dev) API (used by new version check, dependency diff check, and publisher check)
 
-## コントリビューション
+## Contributing
 
-バグ報告やプルリクエストは [GitHub](https://github.com/manami-shindo/pub_sentinel) までお寄せください。
+Bug reports and pull requests are welcome at [GitHub](https://github.com/manami-shindo/pub_sentinel).
 
-## ライセンス
+## License
 
-MIT ライセンスのもとで公開されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
+Released under the MIT License. See the [LICENSE](LICENSE) file for details.

@@ -10,7 +10,7 @@ void main() {
   tearDown(() => project.tearDown());
 
   group('ConstraintChecker', () {
-    test('"any" 制約を警告する', () async {
+    test('warns on "any" constraint', () async {
       project.writePubspec('''
 name: test_app
 dependencies:
@@ -23,7 +23,7 @@ dependencies:
       expect(results.first.severity, Severity.warning);
     });
 
-    test('">=0.0.0" 制約を警告する', () async {
+    test('warns on ">=0.0.0" constraint', () async {
       project.writePubspec('''
 name: test_app
 dependencies:
@@ -35,7 +35,7 @@ dependencies:
       expect(results.first.package, 'bar');
     });
 
-    test('適切な制約はスルーする', () async {
+    test('passes valid constraints', () async {
       project.writePubspec('''
 name: test_app
 dependencies:
@@ -47,7 +47,7 @@ dependencies:
       expect(results, isEmpty);
     });
 
-    test('flutter SDK 依存はスルーする', () async {
+    test('skips flutter SDK dependency', () async {
       project.writePubspec('''
 name: test_app
 dependencies:
@@ -59,12 +59,12 @@ dependencies:
       expect(results, isEmpty);
     });
 
-    test('pubspec.yaml が存在しない場合 空リストを返す', () async {
+    test('returns empty list when pubspec.yaml is missing', () async {
       final results = await ConstraintChecker(projectPath: project.path).run();
       expect(results, isEmpty);
     });
 
-    test('壊れた pubspec.yaml は warning として扱う', () async {
+    test('treats malformed pubspec.yaml as warning', () async {
       project.writePubspec('''
 name: test_app
 dependencies:

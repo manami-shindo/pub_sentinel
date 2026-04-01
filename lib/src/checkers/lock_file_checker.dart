@@ -15,9 +15,9 @@ class LockFileChecker implements Checker {
         const CheckResult(
           package: '(project)',
           severity: Severity.critical,
-          message: 'pubspec.lock が見つかりません',
-          detail: 'pubspec.lock をコミットすることで依存関係のバージョンを固定してください。'
-              'ファイルがない場合、異なる環境で異なるバージョンがインストールされる可能性があります。',
+          message: 'pubspec.lock not found',
+          detail: 'Commit pubspec.lock to pin your dependency versions. '
+              'Without it, different versions may be installed across environments.',
         ),
       ];
     }

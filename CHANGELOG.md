@@ -1,9 +1,10 @@
 ## 0.1.0
 
-- 初回リリース
-- `pubspec.lock` の存在チェック（LockFileChecker）
-- `pubspec.yaml` のバージョン制約チェック（ConstraintChecker）
-- 公開から 3 日以内のパッケージを警告する新規バージョンチェック（NewVersionChecker）
-- 前バージョンとの依存差分によるサプライチェーン攻撃検出（DepDiffChecker）
-- コンソール出力（カラー対応）と JSON 出力に対応
-- 問題あり時の終了コード 1、なし時の終了コード 0
+- Initial release
+- `pubspec.lock` existence check (LockFileChecker)
+- Version constraint check in `pubspec.yaml` (ConstraintChecker)
+- New version check: warns when the locked version was published within 3 days (NewVersionChecker)
+- Dependency diff check: detects supply-chain attacks via newly added dependencies (DepDiffChecker)
+- Publisher check: flags unverified publishers and disposable email domains (PublisherChecker)
+- Console output (with color support) and JSON output
+- Exit code 1 when issues are found, 0 otherwise

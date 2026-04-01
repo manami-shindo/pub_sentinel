@@ -9,7 +9,7 @@ class ConsoleReporter implements Reporter {
   @override
   void report(List<CheckResult> results) {
     if (results.isEmpty) {
-      _print('${_green('✓')} 問題は見つかりませんでした。');
+      _print('${_green('✓')} No issues found.');
       return;
     }
 
@@ -31,7 +31,7 @@ class ConsoleReporter implements Reporter {
 
     print('');
     print(
-        '${results.length} 件の問題が見つかりました '
+        'Found ${results.length} issue(s) '
         '(critical: ${criticals.length}, warning: ${warnings.length}, info: ${infos.length})');
   }
 

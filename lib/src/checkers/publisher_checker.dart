@@ -4,10 +4,10 @@ import '../models/check_result.dart';
 import '../pub_api/pub_api_client.dart';
 import 'checker.dart';
 
-/// パブリッシャーの信頼性を検査する。
+/// Checks the trustworthiness of package publishers.
 ///
-/// - 検証済みパブリッシャーが未設定のパッケージを info として報告する
-/// - 使い捨てメールサービスのドメインがパブリッシャー ID に使われている場合は critical
+/// - Reports packages with no verified publisher as info
+/// - Reports packages whose publisher ID uses a disposable email domain as critical
 class PublisherChecker implements Checker {
   final String projectPath;
   final PubApiClient apiClient;
@@ -17,8 +17,8 @@ class PublisherChecker implements Checker {
     required this.apiClient,
   });
 
-  /// 主要な使い捨てメールサービスのドメイン一覧。
-  /// サブドメイン（例: user.mailinator.com）も _isDisposableDomain で検出する。
+  /// Known disposable email service domains.
+  /// Subdomains (e.g. user.mailinator.com) are also detected by _isDisposableDomain.
   static const _disposableDomains = {
     'mailinator.com',
     'guerrillamail.com',
@@ -326,9 +326,9 @@ class PublisherChecker implements Checker {
           results.add(CheckResult(
             package: name,
             severity: Severity.info,
-            message: '検証済みパブリッシャーが設定されていません',
-            detail: 'pub.dev の検証済みパブリッシャー制度を利用していないパッケージです。'
-                'メンテナーの身元を独自に確認することを推奨します。',
+            message: 'No verified publisher',
+            detail: 'This package has no verified publisher on pub.dev. '
+                'We recommend independently verifying the maintainer\'s identity.',
           ));
           continue;
         }
@@ -337,16 +337,16 @@ class PublisherChecker implements Checker {
           results.add(CheckResult(
             package: name,
             severity: Severity.critical,
-            message: '使い捨てメールサービスのドメインがパブリッシャーとして登録されています: $publisherId',
-            detail: 'サプライチェーン攻撃に悪用される使い捨てメールドメインが'
-                'パブリッシャー ID に使われています。このパッケージの利用を避けてください。',
+            message: 'Disposable email domain registered as publisher: $publisherId',
+            detail: 'A disposable email domain used in supply-chain attacks is registered '
+                'as the publisher ID. Avoid using this package.',
           ));
         }
       } on PubApiException catch (e) {
         results.add(CheckResult(
           package: name,
           severity: Severity.warning,
-          message: 'パブリッシャー情報の取得に失敗しました',
+          message: 'Failed to fetch publisher info',
           detail: e.message,
         ));
       }
@@ -354,10 +354,10 @@ class PublisherChecker implements Checker {
     return results;
   }
 
-  /// publisherId が使い捨てメールドメインかを判定する。
-  /// publisherId はドメイン形式（例: dart.dev）が基本だが、
-  /// email@domain 形式でも動作するよう @ 以降のみを照合する。
-  /// サブドメイン（例: user.mailinator.com）も検出する。
+  /// Returns true if publisherId uses a disposable email domain.
+  /// publisherId is normally a domain (e.g. dart.dev), but also handles
+  /// email@domain format by extracting the part after @.
+  /// Subdomains (e.g. user.mailinator.com) are also detected.
   bool _isDisposableDomain(String publisherId) {
     final lower = publisherId.toLowerCase();
     final domain = lower.contains('@') ? lower.split('@').last : lower;
@@ -372,14 +372,14 @@ class PublisherChecker implements Checker {
       results.add(CheckResult(
         package: '(project)',
         severity: Severity.warning,
-        message: 'pubspec.lock を解析できませんでした',
-        detail: '不正な YAML のため一部の検査をスキップしました: ${e.message}',
+        message: 'Failed to parse pubspec.lock',
+        detail: 'Invalid YAML; some checks were skipped: ${e.message}',
       ));
     } on FileSystemException catch (e) {
       results.add(CheckResult(
         package: '(project)',
         severity: Severity.warning,
-        message: 'pubspec.lock を読み取れませんでした',
+        message: 'Failed to read pubspec.lock',
         detail: e.message,
       ));
     }

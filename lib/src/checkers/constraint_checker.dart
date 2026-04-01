@@ -23,8 +23,8 @@ class ConstraintChecker implements Checker {
           const CheckResult(
             package: '(project)',
             severity: Severity.warning,
-            message: 'pubspec.yaml の形式が不正です',
-            detail: 'YAML のトップレベルがマップではありません。解析できないため、一部の検査をスキップしました。',
+            message: 'pubspec.yaml has invalid format',
+            detail: 'Top-level YAML is not a map. Some checks were skipped.',
           ),
         ];
       }
@@ -34,8 +34,8 @@ class ConstraintChecker implements Checker {
         CheckResult(
           package: '(project)',
           severity: Severity.warning,
-          message: 'pubspec.yaml を解析できませんでした',
-          detail: '不正な YAML のため検査を継続できません: ${e.message}',
+          message: 'Failed to parse pubspec.yaml',
+          detail: 'Invalid YAML, cannot continue checks: ${e.message}',
         ),
       ];
     } on FileSystemException catch (e) {
@@ -43,7 +43,7 @@ class ConstraintChecker implements Checker {
         CheckResult(
           package: '(project)',
           severity: Severity.warning,
-          message: 'pubspec.yaml を読み取れませんでした',
+          message: 'Failed to read pubspec.yaml',
           detail: e.message,
         ),
       ];
@@ -63,7 +63,7 @@ class ConstraintChecker implements Checker {
 
   CheckResult? _checkConstraint(String name, dynamic constraint) {
     if (constraint == null) return null;
-    // sdk: flutter や path: {...} などは文字列でない
+    // Non-string constraints (sdk: flutter, path: {...}) are skipped
     if (constraint is! String) return null;
 
     final c = constraint.trim();
@@ -71,9 +71,9 @@ class ConstraintChecker implements Checker {
       return CheckResult(
         package: name,
         severity: Severity.warning,
-        message: 'バージョン制約が指定されていません: "$c"',
-        detail: '任意のバージョンがインストールされる可能性があります。'
-            '例: "^1.0.0" のように上限付き制約を指定してください。',
+        message: 'No version constraint specified: "$c"',
+        detail: 'Any version may be installed. '
+            'Use a bounded constraint such as "^1.0.0".',
       );
     }
     return null;

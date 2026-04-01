@@ -4,7 +4,7 @@ import 'package:pub_sentinel/src/reporter/console_reporter.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('端末制御文字をサニタイズして出力する', () {
+  test('sanitizes terminal control characters in output', () {
     final reporter = ConsoleReporter(useColor: false);
     final lines = <String>[];
 

@@ -10,7 +10,7 @@ void main() {
   tearDown(() => project.tearDown());
 
   group('LockFileChecker', () {
-    test('pubspec.lock が存在しない場合 critical を返す', () async {
+    test('returns critical when pubspec.lock is missing', () async {
       final checker = LockFileChecker(projectPath: project.path);
       final results = await checker.run();
 
@@ -19,7 +19,7 @@ void main() {
       expect(results.first.package, '(project)');
     });
 
-    test('pubspec.lock が存在する場合 空リストを返す', () async {
+    test('returns empty list when pubspec.lock exists', () async {
       project.writeLockFile('# dummy lock file\npackages: {}\n');
 
       final checker = LockFileChecker(projectPath: project.path);

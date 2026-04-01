@@ -16,7 +16,7 @@ packages:
 sdkConstraints: {}
 ''';
 
-/// foo パッケージの API レスポンスと publisher を返す FakeHttpClient を作る
+/// Builds a FakeHttpClient returning API responses for foo and its deps.
 FakeHttpClient _makeClient({
   required Map<String, dynamic> prevDeps,
   required Map<String, dynamic> currDeps,
@@ -48,9 +48,9 @@ void main() {
   tearDown(() => project.tearDown());
 
   group('DepDiffChecker', () {
-    group('検出：不審な追加', () {
-      test('無関係のパッケージが追加されたら critical（パッチバージョン）', () async {
-        // パッチバージョン: 1.0.0 → 1.0.1
+    group('detection: suspicious additions', () {
+      test('unrelated package added in patch version → critical', () async {
+        // patch version: 1.0.0 → 1.0.1
         project.writeLockFile('''
 packages:
   foo:
@@ -85,7 +85,7 @@ sdkConstraints: {}
         expect(results.first.message, contains('plain-crypto-js'));
       });
 
-      test('マイナーバージョンアップでの不審な追加は warning', () async {
+      test('suspicious addition in minor version bump → warning', () async {
         project.writeLockFile('''
 packages:
   foo:
@@ -119,7 +119,7 @@ sdkConstraints: {}
         expect(results.first.severity, Severity.warning);
       });
 
-      test('メジャーバージョンアップでの不審な追加は info', () async {
+      test('suspicious addition in major version bump → info', () async {
         project.writeLockFile('''
 packages:
   foo:
@@ -154,8 +154,8 @@ sdkConstraints: {}
       });
     });
 
-    group('フィルタリング：正当な追加をスキップ', () {
-      test('既知の安全パッケージ（meta）の追加はスキップ', () async {
+    group('filtering: legitimate additions are skipped', () {
+      test('known-safe package (meta) addition is skipped', () async {
         project.writeLockFile(_lockFile);
 
         final client = _makeClient(
@@ -172,7 +172,7 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('サブパッケージ命名パターン（foo_web など）の追加はスキップ', () async {
+      test('sub-package naming pattern (foo_web etc.) addition is skipped', () async {
         project.writeLockFile(_lockFile);
 
         final client = _makeClient(
@@ -189,14 +189,14 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('同じパブリッシャーが管理する依存の追加はスキップ', () async {
+      test('addition by same publisher is skipped', () async {
         project.writeLockFile(_lockFile);
 
         final client = _makeClient(
           prevDeps: {'http': '^1.0.0'},
           currDeps: {'http': '^1.0.0', 'related-lib': '^1.0.0'},
           fooPublisher: 'example.dev',
-          depPublishers: {'related-lib': 'example.dev'}, // 同じパブリッシャー
+          depPublishers: {'related-lib': 'example.dev'}, // same publisher
         );
 
         final results = await DepDiffChecker(
@@ -207,7 +207,7 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('依存が変わっていない場合は空リスト', () async {
+      test('returns empty list when dependencies are unchanged', () async {
         project.writeLockFile(_lockFile);
 
         final client = _makeClient(
@@ -224,7 +224,7 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('依存のバージョン制約のみ変わった場合はスキップ', () async {
+      test('skips when only version constraint changed', () async {
         project.writeLockFile(_lockFile);
 
         final client = _makeClient(
@@ -241,7 +241,7 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('初回リリース（前バージョンなし）はスキップ', () async {
+      test('skips initial release (no previous version)', () async {
         project.writeLockFile(_lockFile);
 
         final responses = {
@@ -263,7 +263,7 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('pubspec.lock がない場合は空リスト', () async {
+      test('returns empty list when pubspec.lock is missing', () async {
         final results = await DepDiffChecker(
           projectPath: project.path,
           apiClient: PubApiClient(),
@@ -271,7 +271,7 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('pub.dev 応答エラーは warning として扱う', () async {
+      test('treats pub.dev response error as warning', () async {
         project.writeLockFile(_lockFile);
 
         final responses = {
@@ -289,7 +289,7 @@ sdkConstraints: {}
         expect(results.first.message, contains('pub.dev'));
       });
 
-      test('壊れた pubspec.lock は warning として扱う', () async {
+      test('treats malformed pubspec.lock as warning', () async {
         project.writeLockFile('packages: [');
 
         final results = await DepDiffChecker(

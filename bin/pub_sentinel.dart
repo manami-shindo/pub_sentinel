@@ -15,37 +15,37 @@ Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption('path',
         abbr: 'p',
-        help: 'スキャン対象のプロジェクトディレクトリ',
+        help: 'Project directory to scan',
         defaultsTo: '.')
     ..addOption('format',
         abbr: 'f',
-        help: '出力フォーマット (console, json)',
+        help: 'Output format (console, json)',
         defaultsTo: 'console',
         allowed: ['console', 'json'])
     ..addFlag('no-color',
-        help: 'カラー出力を無効化',
+        help: 'Disable colored output',
         negatable: false)
     ..addFlag('verbose',
         abbr: 'v',
-        help: '詳細ログを表示',
+        help: 'Show verbose output',
         negatable: false)
     ..addFlag('help',
         abbr: 'h',
-        help: 'ヘルプを表示',
+        help: 'Show help',
         negatable: false);
 
   final ArgResults args;
   try {
     args = parser.parse(arguments);
   } on FormatException catch (e) {
-    stderr.writeln('エラー: ${e.message}');
+    stderr.writeln('error: ${e.message}');
     stderr.writeln(parser.usage);
     exit(2);
   }
 
   if (args['help'] as bool) {
-    print('pub-sentinel — Dart/Flutter パッケージのセキュリティスキャナ\n');
-    print('使い方: pub-sentinel [オプション]\n');
+    print('pub-sentinel — security scanner for Dart/Flutter packages\n');
+    print('Usage: pub-sentinel [options]\n');
     print(parser.usage);
     exit(0);
   }
@@ -56,16 +56,16 @@ Future<void> main(List<String> arguments) async {
   final verbose = args['verbose'] as bool;
 
   if (!Directory(projectPath).existsSync()) {
-    stderr.writeln('エラー: ディレクトリが見つかりません: $projectPath');
+    stderr.writeln('error: directory not found: $projectPath');
     exit(2);
   }
 
   final String resolvedPath;
   try {
-    // シンボリックリンクを解決し、絶対パスに正規化する。
+    // Resolve symlinks and normalise to an absolute path.
     resolvedPath = Directory(projectPath).resolveSymbolicLinksSync();
   } on FileSystemException catch (e) {
-    stderr.writeln('エラー: スキャン対象パスを解決できません: $projectPath');
+    stderr.writeln('error: cannot resolve scan path: $projectPath');
     stderr.writeln(e.message);
     exit(2);
   }
@@ -75,7 +75,7 @@ Future<void> main(List<String> arguments) async {
       : ConsoleReporter(useColor: !noColor && stdout.hasTerminal);
 
   if (verbose && format != 'json') {
-    print('スキャン対象: $resolvedPath');
+    print('Scanning: $resolvedPath');
   }
 
   final apiClient = PubApiClient();
@@ -92,7 +92,7 @@ Future<void> main(List<String> arguments) async {
 
     for (final checker in checkers) {
       if (verbose && format != 'json') {
-        print('実行中: ${checker.runtimeType}');
+        print('Running: ${checker.runtimeType}');
       }
       try {
         final results = await checker.run();
@@ -101,7 +101,7 @@ Future<void> main(List<String> arguments) async {
         allResults.add(CheckResult(
           package: '(internal)',
           severity: Severity.critical,
-          message: '${checker.runtimeType} の実行中に予期しない例外が発生しました',
+          message: 'Unexpected error in ${checker.runtimeType}',
           detail: e.toString(),
         ));
       }

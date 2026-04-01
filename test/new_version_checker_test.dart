@@ -25,13 +25,13 @@ void main() {
   tearDown(() => project.tearDown());
 
   group('NewVersionChecker', () {
-    test('公開直後のバージョンを警告する', () async {
+    test('warns on recently published version', () async {
       project.writeLockFile(_lockFile);
 
-      // foo: 1時間前に公開
+      // foo: published 1 hour ago
       final recentTime =
           DateTime.now().toUtc().subtract(const Duration(hours: 1));
-      // bar: 10日前に公開（問題なし）
+      // bar: published 10 days ago (no issue)
       final oldTime =
           DateTime.now().toUtc().subtract(const Duration(days: 10));
 
@@ -65,7 +65,7 @@ void main() {
       expect(results.first.severity, Severity.warning);
     });
 
-    test('全パッケージが古い場合 空リストを返す', () async {
+    test('returns empty list when all packages are old', () async {
       project.writeLockFile(_lockFile);
 
       final oldTime = DateTime.now().toUtc().subtract(const Duration(days: 30));
@@ -96,7 +96,7 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('pubspec.lock がない場合 空リストを返す', () async {
+    test('returns empty list when pubspec.lock is missing', () async {
       final checker = NewVersionChecker(
         projectPath: project.path,
         apiClient: PubApiClient(),
@@ -105,7 +105,7 @@ void main() {
       expect(results, isEmpty);
     });
 
-    test('pub.dev の不正な応答は warning として扱う', () async {
+    test('treats malformed pub.dev response as warning', () async {
       project.writeLockFile(_lockFile);
 
       final fakeClient = FakeHttpClient({
@@ -127,7 +127,7 @@ void main() {
       expect(results.first.message, contains('pub.dev'));
     });
 
-    test('壊れた pubspec.lock は warning として扱う', () async {
+    test('treats malformed pubspec.lock as warning', () async {
       project.writeLockFile('packages: [');
 
       final results = await NewVersionChecker(
