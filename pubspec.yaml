@@ -1,6 +1,6 @@
 name: pub_sentinel
 description: Security scanner for Dart/Flutter pub packages. Detects supply chain attacks and risky dependency changes.
-version: 0.1.0
+version: 0.2.0
 repository: https://github.com/manami-shindo/pub_sentinel
 
 environment:
