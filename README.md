@@ -99,7 +99,7 @@ pub-sentinel --format json
 
 ## Requirements
 
-- Dart SDK `>=3.0.0`
+- Dart SDK `>=3.2.0`
 - Internet access to the [pub.dev](https://pub.dev) API (used by new version check, dependency diff check, and publisher check)
 
 ## Contributing
