@@ -1,0 +1,6 @@
+# https://dart.dev/guides/libraries/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# This package ships an executable, so keep pubspec.lock tracked to pin the
+# tool's own dependency graph.
