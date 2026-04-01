@@ -41,7 +41,8 @@ class NewVersionChecker implements Checker {
             package: name,
             severity: Severity.warning,
             message: 'v$version was published only ${age.inHours} hour(s) ago',
-            detail: 'Recently published packages may not have been reviewed for security. '
+            detail:
+                'Recently published packages may not have been reviewed for security. '
                 '(published: ${versionInfo.published.toIso8601String()})',
           ));
         }

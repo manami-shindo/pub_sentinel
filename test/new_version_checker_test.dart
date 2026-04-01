@@ -32,16 +32,14 @@ void main() {
       final recentTime =
           DateTime.now().toUtc().subtract(const Duration(hours: 1));
       // bar: published 10 days ago (no issue)
-      final oldTime =
-          DateTime.now().toUtc().subtract(const Duration(days: 10));
+      final oldTime = DateTime.now().toUtc().subtract(const Duration(days: 10));
 
       final fakeClient = FakeHttpClient({
         'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
           name: 'foo',
           versions: [
             buildVersion(
-                version: '1.2.0',
-                published: recentTime.toIso8601String()),
+                version: '1.2.0', published: recentTime.toIso8601String()),
           ],
         )),
         'https://pub.dev/api/packages/bar': jsonResponse(buildPubApiResponse(
@@ -109,7 +107,8 @@ void main() {
       project.writeLockFile(_lockFile);
 
       final fakeClient = FakeHttpClient({
-        'https://pub.dev/api/packages/foo': jsonResponse({'versions': 'broken'}),
+        'https://pub.dev/api/packages/foo':
+            jsonResponse({'versions': 'broken'}),
         'https://pub.dev/api/packages/bar': jsonResponse(buildPubApiResponse(
           name: 'bar',
           versions: [],

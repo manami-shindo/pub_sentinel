@@ -1,6 +1,6 @@
 import 'dart:io';
 
-/// テスト用の一時プロジェクトディレクトリを作成・管理する
+/// Creates and manages a temporary project directory for tests.
 class TempProject {
   late Directory dir;
 

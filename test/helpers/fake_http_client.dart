@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// テスト用の簡易 HTTP クライアント。URL ごとにレスポンスを差し替える。
+/// Fake HTTP client for tests. Returns pre-configured responses per URL.
 class FakeHttpClient extends http.BaseClient {
   final Map<String, http.Response> _responses;
 
@@ -22,7 +22,7 @@ class FakeHttpClient extends http.BaseClient {
   }
 }
 
-/// pub.dev API レスポンスの JSON を組み立てるヘルパー
+/// Builds a pub.dev API response JSON for testing.
 Map<String, dynamic> buildPubApiResponse({
   required String name,
   required List<Map<String, dynamic>> versions,

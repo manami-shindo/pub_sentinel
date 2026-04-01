@@ -11,6 +11,7 @@
 - **New version check** — warns when the locked package version was published within the last 3 days. Freshly published packages may not have been reviewed for security.
 - **Dependency diff check** — compares each locked package's dependency list against the previous version and flags newly added dependencies. This is a typical supply-chain attack pattern.
 - **Publisher check** — reports packages with no verified publisher and flags those whose publisher domain matches a known disposable email service.
+- **Typosquat check** — detects package names within 1 edit (OSA distance) of popular pub.dev packages, catching common typosquatting attacks like character substitution, insertion, deletion, and transposition.
 
 ## Installation
 
@@ -22,7 +23,7 @@ Or add as a dev dependency:
 
 ```yaml
 dev_dependencies:
-  pub_sentinel: ^0.1.0
+  pub_sentinel: ^0.2.0
 ```
 
 ## Usage
@@ -55,9 +56,10 @@ pub-sentinel --path /path/to/your/project
 ✗ CRITICAL  [some_package] Suspicious dependencies added in v1.2.3: shady_lib
              Dependencies not present in the previous version (v1.2.2) were added.…
 ⚠ WARNING   [another_pkg] v0.9.1 was published only 4 hour(s) ago
+⚠ WARNING   [proivder] Possible typosquatting: "proivder" is 1 edit away from "provider"
 ℹ INFO      [big_package] No verified publisher
 
-3 issue(s) found (critical: 1, warning: 1, info: 1)
+4 issue(s) found (critical: 1, warning: 2, info: 1)
 ```
 
 ### JSON output example

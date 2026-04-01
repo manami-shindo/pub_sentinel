@@ -11,7 +11,7 @@ class PubApiClient {
 
   PubApiClient({http.Client? client}) : _client = client ?? http.Client();
 
-  /// パッケージのパブリッシャー ID を返す。未設定なら null。
+  /// Returns the publisher ID for [name], or null if not set.
   Future<String?> fetchPublisher(String name) async {
     final uri = Uri(
       scheme: 'https',
@@ -44,7 +44,8 @@ class PubApiClient {
     final json = _decodeJsonObject(response.body, 'package $name');
     final rawVersions = json['versions'];
     if (rawVersions is! List) {
-      throw PubApiException('Invalid package response for $name: versions is missing');
+      throw PubApiException(
+          'Invalid package response for $name: versions is missing');
     }
 
     final versions = rawVersions
@@ -56,9 +57,7 @@ class PubApiClient {
 
   Future<http.Response> _get(Uri uri) async {
     try {
-      return await _client
-          .get(uri, headers: _headers)
-          .timeout(_requestTimeout);
+      return await _client.get(uri, headers: _headers).timeout(_requestTimeout);
     } on TimeoutException {
       throw const PubApiException('Request to pub.dev timed out');
     } on http.ClientException catch (e) {

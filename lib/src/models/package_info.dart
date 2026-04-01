@@ -37,7 +37,7 @@ class PackageInfo {
     return null;
   }
 
-  /// versions はAPIレスポンス順（古い順）なので、直前バージョンを返す
+  /// Returns the version immediately before [version] in API response order (oldest first).
   VersionInfo? previousVersion(String version) {
     final idx = versions.indexWhere((v) => v.version == version);
     if (idx <= 0) return null;

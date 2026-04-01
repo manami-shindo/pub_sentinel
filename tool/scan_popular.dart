@@ -1,17 +1,41 @@
-// pub.dev の人気パッケージ上位 N 件をスキャンして
-// フィルタリング済みの不審な依存追加を列挙する探索スクリプト。
+// Scans the top N popular pub.dev packages and lists
+// suspicious dependency additions that pass the filter.
 import 'dart:io';
 import 'package:pub_sentinel/src/checkers/dep_diff_checker.dart';
 import 'package:pub_sentinel/src/pub_api/pub_api_client.dart';
 
 const _packages = [
-  'http', 'uuid', 'shared_preferences', 'path_provider', 'url_launcher',
-  'crypto', 'flutter_svg', 'dio', 'image_picker', 'google_fonts',
-  'provider', 'get', 'rxdart', 'bloc', 'flutter_bloc',
-  'equatable', 'json_annotation', 'freezed', 'hive', 'sqflite',
-  'firebase_core', 'firebase_auth', 'cloud_firestore', 'firebase_storage',
-  'intl', 'yaml', 'args', 'logger', 'cached_network_image',
-  'permission_handler', 'connectivity_plus',
+  'http',
+  'uuid',
+  'shared_preferences',
+  'path_provider',
+  'url_launcher',
+  'crypto',
+  'flutter_svg',
+  'dio',
+  'image_picker',
+  'google_fonts',
+  'provider',
+  'get',
+  'rxdart',
+  'bloc',
+  'flutter_bloc',
+  'equatable',
+  'json_annotation',
+  'freezed',
+  'hive',
+  'sqflite',
+  'firebase_core',
+  'firebase_auth',
+  'cloud_firestore',
+  'firebase_storage',
+  'intl',
+  'yaml',
+  'args',
+  'logger',
+  'cached_network_image',
+  'permission_handler',
+  'connectivity_plus',
 ];
 
 Future<void> main() async {
@@ -19,18 +43,18 @@ Future<void> main() async {
   final tempDir = await Directory.systemTemp.createTemp('pub_sentinel_scan_');
   var totalFindings = 0;
 
-  print('${_packages.length} パッケージをスキャン中（フィルタリングあり）...\n');
+  print('Scanning ${_packages.length} packages (with filtering)...\n');
 
   try {
     for (final name in _packages) {
-      // 各パッケージの最新バージョンを取得
+      // Fetch the latest version of each package
       final info = await _fetchLatestVersion(apiClient, name);
       if (info == null) {
-        print('[$name] スキップ（取得失敗）');
+        print('[$name] skipped (fetch failed)');
         continue;
       }
 
-      // 一時 pubspec.lock を作成して DepDiffChecker を実行
+      // Write a temporary pubspec.lock and run DepDiffChecker
       final lockFile = File('${tempDir.path}/pubspec.lock');
       lockFile.writeAsStringSync(_buildLockFile(name, info));
 
@@ -41,10 +65,11 @@ Future<void> main() async {
       final results = await checker.run();
 
       if (results.isEmpty) {
-        print('[$name@$info] ✓ 問題なし');
+        print('[$name@$info] ✓ no issues');
       } else {
         for (final r in results) {
-          print('[$name@$info] ⚠️  ${r.severity.name.toUpperCase()}: ${r.message}');
+          print(
+              '[$name@$info] ⚠️  ${r.severity.name.toUpperCase()}: ${r.message}');
           totalFindings++;
         }
       }
@@ -54,11 +79,11 @@ Future<void> main() async {
     await tempDir.delete(recursive: true);
   }
 
-  print('\n=== 結果サマリー ===');
-  print('スキャン: ${_packages.length} パッケージ');
-  print('フィルタリング後の警告: $totalFindings 件');
+  print('\n=== Summary ===');
+  print('Scanned: ${_packages.length} packages');
+  print('Findings after filtering: $totalFindings');
   if (totalFindings == 0) {
-    print('今回のパッケージ群では不審な依存追加は検出されませんでした。');
+    print('No suspicious dependency additions detected in this package set.');
   }
 }
 

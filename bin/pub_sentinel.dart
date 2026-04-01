@@ -5,6 +5,7 @@ import 'package:pub_sentinel/src/checkers/dep_diff_checker.dart';
 import 'package:pub_sentinel/src/checkers/lock_file_checker.dart';
 import 'package:pub_sentinel/src/checkers/new_version_checker.dart';
 import 'package:pub_sentinel/src/checkers/publisher_checker.dart';
+import 'package:pub_sentinel/src/checkers/typosquat_checker.dart';
 import 'package:pub_sentinel/src/models/check_result.dart';
 import 'package:pub_sentinel/src/pub_api/pub_api_client.dart';
 import 'package:pub_sentinel/src/reporter/console_reporter.dart';
@@ -14,25 +15,16 @@ import 'package:pub_sentinel/src/reporter/reporter.dart';
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
     ..addOption('path',
-        abbr: 'p',
-        help: 'Project directory to scan',
-        defaultsTo: '.')
+        abbr: 'p', help: 'Project directory to scan', defaultsTo: '.')
     ..addOption('format',
         abbr: 'f',
         help: 'Output format (console, json)',
         defaultsTo: 'console',
         allowed: ['console', 'json'])
-    ..addFlag('no-color',
-        help: 'Disable colored output',
-        negatable: false)
+    ..addFlag('no-color', help: 'Disable colored output', negatable: false)
     ..addFlag('verbose',
-        abbr: 'v',
-        help: 'Show verbose output',
-        negatable: false)
-    ..addFlag('help',
-        abbr: 'h',
-        help: 'Show help',
-        negatable: false);
+        abbr: 'v', help: 'Show verbose output', negatable: false)
+    ..addFlag('help', abbr: 'h', help: 'Show help', negatable: false);
 
   final ArgResults args;
   try {
@@ -88,6 +80,7 @@ Future<void> main(List<String> arguments) async {
       NewVersionChecker(projectPath: resolvedPath, apiClient: apiClient),
       DepDiffChecker(projectPath: resolvedPath, apiClient: apiClient),
       PublisherChecker(projectPath: resolvedPath, apiClient: apiClient),
+      TyposquatChecker(projectPath: resolvedPath),
     ];
 
     for (final checker in checkers) {

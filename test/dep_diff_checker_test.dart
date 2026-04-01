@@ -27,8 +27,10 @@ FakeHttpClient _makeClient({
     'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
       name: 'foo',
       versions: [
-        buildVersion(version: '1.0.0', published: _published, dependencies: prevDeps),
-        buildVersion(version: '1.1.0', published: _published, dependencies: currDeps),
+        buildVersion(
+            version: '1.0.0', published: _published, dependencies: prevDeps),
+        buildVersion(
+            version: '1.1.0', published: _published, dependencies: currDeps),
       ],
     )),
     'https://pub.dev/api/packages/foo/publisher':
@@ -63,13 +65,21 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
             name: 'foo',
             versions: [
-              buildVersion(version: '1.0.0', published: _published,
+              buildVersion(
+                  version: '1.0.0',
+                  published: _published,
                   dependencies: {'http': '^1.0.0'}),
-              buildVersion(version: '1.0.1', published: _published,
-                  dependencies: {'http': '^1.0.0', 'plain-crypto-js': '^4.2.1'}),
+              buildVersion(
+                  version: '1.0.1',
+                  published: _published,
+                  dependencies: {
+                    'http': '^1.0.0',
+                    'plain-crypto-js': '^4.2.1'
+                  }),
             ],
           )),
-          'https://pub.dev/api/packages/foo/publisher': publisherResponse('example.dev'),
+          'https://pub.dev/api/packages/foo/publisher':
+              publisherResponse('example.dev'),
           'https://pub.dev/api/packages/plain-crypto-js/publisher':
               publisherResponse('attacker.dev'),
         };
@@ -99,13 +109,18 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
             name: 'foo',
             versions: [
-              buildVersion(version: '1.0.0', published: _published,
+              buildVersion(
+                  version: '1.0.0',
+                  published: _published,
                   dependencies: {'http': '^1.0.0'}),
-              buildVersion(version: '1.1.0', published: _published,
+              buildVersion(
+                  version: '1.1.0',
+                  published: _published,
                   dependencies: {'http': '^1.0.0', 'evil-package': '^1.0.0'}),
             ],
           )),
-          'https://pub.dev/api/packages/foo/publisher': publisherResponse('example.dev'),
+          'https://pub.dev/api/packages/foo/publisher':
+              publisherResponse('example.dev'),
           'https://pub.dev/api/packages/evil-package/publisher':
               publisherResponse('attacker.dev'),
         };
@@ -133,13 +148,18 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
             name: 'foo',
             versions: [
-              buildVersion(version: '1.9.0', published: _published,
+              buildVersion(
+                  version: '1.9.0',
+                  published: _published,
                   dependencies: {'http': '^1.0.0'}),
-              buildVersion(version: '2.0.0', published: _published,
+              buildVersion(
+                  version: '2.0.0',
+                  published: _published,
                   dependencies: {'http': '^1.0.0', 'shady-lib': '^1.0.0'}),
             ],
           )),
-          'https://pub.dev/api/packages/foo/publisher': publisherResponse('example.dev'),
+          'https://pub.dev/api/packages/foo/publisher':
+              publisherResponse('example.dev'),
           'https://pub.dev/api/packages/shady-lib/publisher':
               publisherResponse('another.dev'),
         };
@@ -172,12 +192,17 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
-      test('sub-package naming pattern (foo_web etc.) addition is skipped', () async {
+      test('sub-package naming pattern (foo_web etc.) addition is skipped',
+          () async {
         project.writeLockFile(_lockFile);
 
         final client = _makeClient(
           prevDeps: {'http': '^1.0.0'},
-          currDeps: {'http': '^1.0.0', 'foo_web': '^1.0.0', 'foo_platform_interface': '^1.0.0'},
+          currDeps: {
+            'http': '^1.0.0',
+            'foo_web': '^1.0.0',
+            'foo_platform_interface': '^1.0.0'
+          },
           fooPublisher: 'example.dev',
         );
 
@@ -248,7 +273,9 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
             name: 'foo',
             versions: [
-              buildVersion(version: '1.1.0', published: _published,
+              buildVersion(
+                  version: '1.1.0',
+                  published: _published,
                   dependencies: {'http': '^1.0.0'}),
             ],
           )),
@@ -275,7 +302,8 @@ sdkConstraints: {}
         project.writeLockFile(_lockFile);
 
         final responses = {
-          'https://pub.dev/api/packages/foo': jsonResponse({'versions': 'broken'}),
+          'https://pub.dev/api/packages/foo':
+              jsonResponse({'versions': 'broken'}),
         };
 
         final results = await DepDiffChecker(

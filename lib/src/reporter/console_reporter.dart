@@ -30,8 +30,7 @@ class ConsoleReporter implements Reporter {
     }
 
     print('');
-    print(
-        'Found ${results.length} issue(s) '
+    print('Found ${results.length} issue(s) '
         '(critical: ${criticals.length}, warning: ${warnings.length}, info: ${infos.length})');
   }
 

@@ -68,9 +68,8 @@ class DepDiffChecker implements Checker {
         final mainPublisher = await apiClient.fetchPublisher(name);
 
         // First, exclude by static rules (list + naming patterns)
-        final candidates = addedDeps
-            .where((dep) => !_isStaticallySafe(dep, name))
-            .toList();
+        final candidates =
+            addedDeps.where((dep) => !_isStaticallySafe(dep, name)).toList();
         if (candidates.isEmpty) continue;
 
         // Then compare publishers for the remaining candidates
@@ -91,8 +90,10 @@ class DepDiffChecker implements Checker {
         results.add(CheckResult(
           package: name,
           severity: severity,
-          message: 'Suspicious dependencies added in v$version: ${suspicious.join(', ')}',
-          detail: 'Dependencies not present in the previous version (v${previous.version}) were added. '
+          message:
+              'Suspicious dependencies added in v$version: ${suspicious.join(', ')}',
+          detail:
+              'Dependencies not present in the previous version (v${previous.version}) were added. '
               'This is a typical supply-chain attack pattern. Please review the changes.',
         ));
       } on PackageNotFoundException {
@@ -154,7 +155,8 @@ class DepDiffChecker implements Checker {
       if (to.minor > from.minor) return Severity.warning;
       return Severity.critical; // patch or build-metadata-only change
     } catch (_) {
-      return Severity.warning; // fall back to warning if versions cannot be parsed
+      return Severity
+          .warning; // fall back to warning if versions cannot be parsed
     }
   }
 

@@ -9,7 +9,8 @@ class JsonReporter implements Reporter {
       'issues': results.map((r) => r.toJson()).toList(),
       'summary': {
         'total': results.length,
-        'critical': results.where((r) => r.severity == Severity.critical).length,
+        'critical':
+            results.where((r) => r.severity == Severity.critical).length,
         'warning': results.where((r) => r.severity == Severity.warning).length,
         'info': results.where((r) => r.severity == Severity.info).length,
       },

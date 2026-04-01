@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Typosquat check: detects package names within 1 edit (OSA distance) of popular pub.dev packages (TyposquatChecker)
+
 ## 0.1.0
 
 - Initial release

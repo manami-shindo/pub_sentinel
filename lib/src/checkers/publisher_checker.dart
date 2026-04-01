@@ -337,8 +337,10 @@ class PublisherChecker implements Checker {
           results.add(CheckResult(
             package: name,
             severity: Severity.critical,
-            message: 'Disposable email domain registered as publisher: $publisherId',
-            detail: 'A disposable email domain used in supply-chain attacks is registered '
+            message:
+                'Disposable email domain registered as publisher: $publisherId',
+            detail:
+                'A disposable email domain used in supply-chain attacks is registered '
                 'as the publisher ID. Avoid using this package.',
           ));
         }
