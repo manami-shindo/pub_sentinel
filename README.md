@@ -23,7 +23,7 @@ Or add as a dev dependency:
 
 ```yaml
 dev_dependencies:
-  pub_sentinel: ^0.2.0
+  pub_sentinel: ^0.2.1
 ```
 
 ## Usage
@@ -46,9 +46,29 @@ pub-sentinel --path /path/to/your/project
 |---|---|---|---|
 | `--path` | `-p` | `.` | Project directory to scan |
 | `--format` | `-f` | `console` | Output format: `console` or `json` |
+| `--ignore` | | | Exclude a package from all checks (repeatable) |
+| `--min-severity` | | `info` | Minimum severity to report: `info`, `warning`, or `critical` |
 | `--no-color` | | | Disable colored output |
 | `--verbose` | `-v` | | Show progress messages during scan |
 | `--help` | `-h` | | Show help |
+
+### Ignoring packages
+
+Suppress false positives for specific packages using the `--ignore` flag:
+
+```sh
+pub-sentinel --ignore objective_c --ignore riverpod_analyzer_utils
+```
+
+Or create a `.pub_sentinel.yaml` in your project root for a persistent ignore list:
+
+```yaml
+ignore:
+  - objective_c
+  - riverpod_analyzer_utils
+```
+
+The project's own package is always excluded automatically.
 
 ### Console output example
 

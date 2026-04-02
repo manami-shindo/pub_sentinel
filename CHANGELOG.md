@@ -1,3 +1,10 @@
+## 0.2.1
+
+- Add `--ignore` flag (repeatable) and `.pub_sentinel.yaml` ignore list to exclude specific packages from all checks
+- Auto-exclude the scanned project's own package from results
+- Add `--min-severity` flag (`info`/`warning`/`critical`) to suppress low-signal findings
+- Fix `DepDiffChecker`: when main package has no verified publisher, results now include a note explaining that publisher comparison was skipped
+
 ## 0.2.0
 
 - Typosquat check: detects package names within 1 edit (OSA distance) of popular pub.dev packages (TyposquatChecker)
