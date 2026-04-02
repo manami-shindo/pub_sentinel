@@ -93,7 +93,6 @@ class DepDiffChecker implements Checker {
         }
         if (verifiedDeps.isEmpty && unverifiedDeps.isEmpty) continue;
 
-        final versionSeverity = _severityFor(previous.version, current.version);
         final publisherNote = publisherUnknown
             ? ' $name has no verified publisher, so publisher comparison was skipped.'
             : '';
@@ -101,7 +100,7 @@ class DepDiffChecker implements Checker {
         if (unverifiedDeps.isNotEmpty) {
           results.add(CheckResult(
             package: name,
-            severity: versionSeverity,
+            severity: _severityFor(previous.version, current.version),
             message:
                 'Suspicious dependencies added in v$version: ${unverifiedDeps.join(', ')}',
             detail:
