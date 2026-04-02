@@ -214,6 +214,30 @@ sdkConstraints: {}
         expect(results, isEmpty);
       });
 
+      test('flags addition when main package has no publisher, noting skipped comparison',
+          () async {
+        project.writeLockFile(_lockFile);
+
+        // fooPublisher is null — publisher comparison cannot be performed
+        final client = _makeClient(
+          prevDeps: {'http': '^1.0.0'},
+          currDeps: {'http': '^1.0.0', 'some-lib': '^1.0.0'},
+          fooPublisher: null,
+          depPublishers: {'some-lib': 'trusted.dev'},
+        );
+
+        final results = await DepDiffChecker(
+          projectPath: project.path,
+          apiClient: PubApiClient(client: client),
+        ).run();
+
+        // Still flagged — we cannot verify publisher match
+        expect(results, hasLength(1));
+        expect(results.first.message, contains('some-lib'));
+        // Detail explains why publisher comparison was skipped
+        expect(results.first.detail, contains('no verified publisher'));
+      });
+
       test('addition by same publisher is skipped', () async {
         project.writeLockFile(_lockFile);
 

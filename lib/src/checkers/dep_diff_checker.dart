@@ -72,10 +72,14 @@ class DepDiffChecker implements Checker {
             addedDeps.where((dep) => !_isStaticallySafe(dep, name)).toList();
         if (candidates.isEmpty) continue;
 
-        // Then compare publishers for the remaining candidates
+        // Then compare publishers for the remaining candidates.
+        // If mainPublisher is unknown we cannot compare, so all candidates
+        // remain suspicious — but we note this in the detail so users know
+        // why the publisher check was not applied.
+        final publisherUnknown = mainPublisher == null;
         final suspicious = <String>[];
         for (final dep in candidates) {
-          if (mainPublisher != null) {
+          if (!publisherUnknown) {
             final depPublisher = await apiClient.fetchPublisher(dep);
             if (depPublisher == mainPublisher) continue;
           }
@@ -87,6 +91,9 @@ class DepDiffChecker implements Checker {
           previous.version,
           current.version,
         );
+        final publisherNote = publisherUnknown
+            ? ' $name has no verified publisher, so publisher comparison was skipped.'
+            : '';
         results.add(CheckResult(
           package: name,
           severity: severity,
@@ -94,7 +101,7 @@ class DepDiffChecker implements Checker {
               'Suspicious dependencies added in v$version: ${suspicious.join(', ')}',
           detail:
               'Dependencies not present in the previous version (v${previous.version}) were added. '
-              'This is a typical supply-chain attack pattern. Please review the changes.',
+              'This is a typical supply-chain attack pattern. Please review the changes.$publisherNote',
         ));
       } on PackageNotFoundException {
         // Packages not on pub.dev (e.g. git deps) are skipped
