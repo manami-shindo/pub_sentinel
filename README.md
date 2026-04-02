@@ -9,7 +9,7 @@
 - **Lock file check** — warns when `pubspec.lock` is missing. Without it, different versions may be installed across environments.
 - **Version constraint check** — detects unconstrained dependencies such as `any`, empty string, or `>=0.0.0`. These allow any version to be resolved.
 - **New version check** — warns when the locked package version was published within the last 3 days. Freshly published packages may not have been reviewed for security.
-- **Dependency diff check** — compares each locked package's dependency list against the previous version and flags newly added dependencies. This is a typical supply-chain attack pattern.
+- **Dependency diff check** — compares each locked package's dependency list against the previous version and flags newly added dependencies. This is a typical supply-chain attack pattern. Severity is based on two factors: the version bump type (patch → `CRITICAL`, minor → `WARNING`, major → `INFO`) and the added dependency's publisher status (verified publisher → capped at `INFO`).
 - **Publisher check** — reports packages with no verified publisher and flags those whose publisher domain matches a known disposable email service.
 - **Typosquat check** — detects package names within 1 edit (OSA distance) of popular pub.dev packages, catching common typosquatting attacks like character substitution, insertion, deletion, and transposition.
 
