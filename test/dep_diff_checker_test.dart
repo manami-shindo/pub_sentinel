@@ -81,7 +81,7 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo/publisher':
               publisherResponse('example.dev'),
           'https://pub.dev/api/packages/plain-crypto-js/publisher':
-              publisherResponse('attacker.dev'),
+              publisherResponse(null),
         };
         final client = FakeHttpClient(responses);
 
@@ -122,7 +122,7 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo/publisher':
               publisherResponse('example.dev'),
           'https://pub.dev/api/packages/evil-package/publisher':
-              publisherResponse('attacker.dev'),
+              publisherResponse(null),
         };
 
         final results = await DepDiffChecker(
@@ -161,7 +161,7 @@ sdkConstraints: {}
           'https://pub.dev/api/packages/foo/publisher':
               publisherResponse('example.dev'),
           'https://pub.dev/api/packages/shady-lib/publisher':
-              publisherResponse('another.dev'),
+              publisherResponse(null),
         };
 
         final results = await DepDiffChecker(
@@ -171,6 +171,95 @@ sdkConstraints: {}
 
         expect(results, hasLength(1));
         expect(results.first.severity, Severity.info);
+      });
+    });
+
+    group('severity: verified-publisher dep is downgraded to info', () {
+      test('dep with verified publisher → info regardless of patch bump',
+          () async {
+        project.writeLockFile('''
+packages:
+  foo:
+    dependency: direct main
+    source: hosted
+    version: "1.0.1"
+sdkConstraints: {}
+''');
+        final responses = {
+          'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
+            name: 'foo',
+            versions: [
+              buildVersion(
+                  version: '1.0.0',
+                  published: _published,
+                  dependencies: {}),
+              buildVersion(
+                  version: '1.0.1',
+                  published: _published,
+                  dependencies: {'objective_c': '^1.0.0'}),
+            ],
+          )),
+          'https://pub.dev/api/packages/foo/publisher':
+              publisherResponse('flutter.dev'),
+          'https://pub.dev/api/packages/objective_c/publisher':
+              publisherResponse('dart.dev'),
+        };
+
+        final results = await DepDiffChecker(
+          projectPath: project.path,
+          apiClient: PubApiClient(client: FakeHttpClient(responses)),
+        ).run();
+
+        expect(results, hasLength(1));
+        expect(results.first.severity, Severity.info);
+        expect(results.first.message, contains('objective_c'));
+      });
+
+      test('mixed: unverified dep → warning, verified dep → info', () async {
+        project.writeLockFile('''
+packages:
+  foo:
+    dependency: direct main
+    source: hosted
+    version: "1.1.0"
+sdkConstraints: {}
+''');
+        final responses = {
+          'https://pub.dev/api/packages/foo': jsonResponse(buildPubApiResponse(
+            name: 'foo',
+            versions: [
+              buildVersion(
+                  version: '1.0.0',
+                  published: _published,
+                  dependencies: {}),
+              buildVersion(
+                  version: '1.1.0',
+                  published: _published,
+                  dependencies: {
+                    'objective_c': '^1.0.0',
+                    'shady-lib': '^1.0.0',
+                  }),
+            ],
+          )),
+          'https://pub.dev/api/packages/foo/publisher':
+              publisherResponse('example.dev'),
+          'https://pub.dev/api/packages/objective_c/publisher':
+              publisherResponse('dart.dev'),
+          'https://pub.dev/api/packages/shady-lib/publisher':
+              publisherResponse(null),
+        };
+
+        final results = await DepDiffChecker(
+          projectPath: project.path,
+          apiClient: PubApiClient(client: FakeHttpClient(responses)),
+        ).run();
+
+        expect(results, hasLength(2));
+        final warning =
+            results.firstWhere((r) => r.severity == Severity.warning);
+        final info = results.firstWhere((r) => r.severity == Severity.info);
+        expect(warning.message, contains('shady-lib'));
+        expect(info.message, contains('objective_c'));
       });
     });
 

@@ -23,7 +23,7 @@ Or add as a dev dependency:
 
 ```yaml
 dev_dependencies:
-  pub_sentinel: ^0.2.1
+  pub_sentinel: ^0.2.2
 ```
 
 ## Usage

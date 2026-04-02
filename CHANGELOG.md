@@ -1,3 +1,7 @@
+## 0.2.2
+
+- `DepDiffChecker`: newly added dependencies with a verified publisher are now reported as `INFO` instead of `WARNING`/`CRITICAL`, reducing noise for low-risk additions (e.g. `objective_c` by `dart.dev`)
+
 ## 0.2.1
 
 - Add `--ignore` flag (repeatable) and `.pub_sentinel.yaml` ignore list to exclude specific packages from all checks

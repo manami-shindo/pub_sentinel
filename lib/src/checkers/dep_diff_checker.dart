@@ -72,37 +72,54 @@ class DepDiffChecker implements Checker {
             addedDeps.where((dep) => !_isStaticallySafe(dep, name)).toList();
         if (candidates.isEmpty) continue;
 
-        // Then compare publishers for the remaining candidates.
-        // If mainPublisher is unknown we cannot compare, so all candidates
-        // remain suspicious — but we note this in the detail so users know
-        // why the publisher check was not applied.
+        // Compare publishers for the remaining candidates.
+        // Deps with the same publisher as the main package are skipped entirely.
+        // The rest are classified by whether they have any verified publisher:
+        //   - verified (non-null publisherId) → less suspicious → INFO
+        //   - unverified (null publisherId)   → suspicious      → severity by version bump
+        // If mainPublisher is unknown we cannot do same-publisher filtering,
+        // but we still classify each dep by its own publisher status.
         final publisherUnknown = mainPublisher == null;
-        final suspicious = <String>[];
+        final verifiedDeps = <String>[];
+        final unverifiedDeps = <String>[];
         for (final dep in candidates) {
-          if (!publisherUnknown) {
-            final depPublisher = await apiClient.fetchPublisher(dep);
-            if (depPublisher == mainPublisher) continue;
+          final depPublisher = await apiClient.fetchPublisher(dep);
+          if (!publisherUnknown && depPublisher == mainPublisher) continue;
+          if (depPublisher != null) {
+            verifiedDeps.add(dep);
+          } else {
+            unverifiedDeps.add(dep);
           }
-          suspicious.add(dep);
         }
-        if (suspicious.isEmpty) continue;
+        if (verifiedDeps.isEmpty && unverifiedDeps.isEmpty) continue;
 
-        final severity = _severityFor(
-          previous.version,
-          current.version,
-        );
+        final versionSeverity = _severityFor(previous.version, current.version);
         final publisherNote = publisherUnknown
             ? ' $name has no verified publisher, so publisher comparison was skipped.'
             : '';
-        results.add(CheckResult(
-          package: name,
-          severity: severity,
-          message:
-              'Suspicious dependencies added in v$version: ${suspicious.join(', ')}',
-          detail:
-              'Dependencies not present in the previous version (v${previous.version}) were added. '
-              'This is a typical supply-chain attack pattern. Please review the changes.$publisherNote',
-        ));
+
+        if (unverifiedDeps.isNotEmpty) {
+          results.add(CheckResult(
+            package: name,
+            severity: versionSeverity,
+            message:
+                'Suspicious dependencies added in v$version: ${unverifiedDeps.join(', ')}',
+            detail:
+                'Dependencies not present in the previous version (v${previous.version}) were added. '
+                'This is a typical supply-chain attack pattern. Please review the changes.$publisherNote',
+          ));
+        }
+        if (verifiedDeps.isNotEmpty) {
+          results.add(CheckResult(
+            package: name,
+            severity: Severity.info,
+            message:
+                'New verified-publisher dependencies added in v$version: ${verifiedDeps.join(', ')}',
+            detail:
+                'Dependencies not present in the previous version (v${previous.version}) were added. '
+                'Each has a verified publisher, but review is still recommended.$publisherNote',
+          ));
+        }
       } on PackageNotFoundException {
         // Packages not on pub.dev (e.g. git deps) are skipped
       } on PubApiException catch (e) {
